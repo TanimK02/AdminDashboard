@@ -24,7 +24,7 @@ app.use('/activity', activityLogRouter);
 
 // export default app;
 
-Start server
+// Start server
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
