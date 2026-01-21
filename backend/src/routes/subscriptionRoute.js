@@ -1,4 +1,4 @@
-import { getAllSubscriptions, getSubscription } from '../controllers/subscriptionController.js';
+import { getAllSubscriptions, getSubscription, getSubscriptionsStats } from '../controllers/subscriptionController.js';
 import { adminAuth } from '../middleware/authMiddleware.js';
 import { Router } from 'express';
 
@@ -9,6 +9,9 @@ subscriptionRouter.use(adminAuth);
 
 // Get all subscriptions
 subscriptionRouter.get('/', getAllSubscriptions);
+
+// Get subscription stats (must come before /:id)
+subscriptionRouter.get('/stats', getSubscriptionsStats);
 
 // Get subscription by ID
 subscriptionRouter.get('/:id', getSubscription);

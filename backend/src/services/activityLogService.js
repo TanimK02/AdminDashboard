@@ -51,4 +51,13 @@ const createActivityLog = async (actorType, action, entityType, entityId, actorI
     });
 };
 
-export { getActivityLogs, getActivityLogById, createActivityLog };
+const getActivityStats = async () => {
+    const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const [last24h] = await Promise.all([
+        prisma.activityLog.count({ where: { createdAt: { gte: since } } }),
+    ]);
+
+    return { last24h };
+};
+
+export { getActivityLogs, getActivityLogById, createActivityLog, getActivityStats };

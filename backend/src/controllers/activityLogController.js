@@ -1,4 +1,4 @@
-import { getActivityLogs, getActivityLogById } from '../services/activityLogService.js';
+import { getActivityLogs, getActivityLogById, getActivityStats } from '../services/activityLogService.js';
 
 // Get all activity logs
 export const getAllActivityLogs = async (req, res) => {
@@ -23,5 +23,15 @@ export const getActivityLog = async (req, res) => {
         }
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch activity log' });
+    }
+};
+
+// Get activity stats (counts)
+export const getActivityLogsStats = async (req, res) => {
+    try {
+        const stats = await getActivityStats();
+        res.json({ stats });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch activity stats' });
     }
 };

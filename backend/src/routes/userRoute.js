@@ -1,4 +1,4 @@
-import { getAllUsers, getUser, updateUser, bulkUpdateUsers } from '../controllers/userController.js';
+import { getAllUsers, getUsersStats, getUser, updateUser, bulkUpdateUsers } from '../controllers/userController.js';
 import { adminAuth } from '../middleware/authMiddleware.js';
 import { Router } from 'express';
 
@@ -9,6 +9,9 @@ userRouter.use(adminAuth);
 
 // Get all users
 userRouter.get('/', getAllUsers);
+
+// Get user stats (must come before /:id)
+userRouter.get('/stats', getUsersStats);
 
 // Bulk update user statuses (must come before /:id route)
 userRouter.patch('/bulk', bulkUpdateUsers);

@@ -1,4 +1,4 @@
-import { getSubscriptions, getSubscriptionById } from "../services/subscriptionService.js";
+import { getSubscriptions, getSubscriptionById, getSubscriptionStats } from "../services/subscriptionService.js";
 
 // Get all subscriptions
 export const getAllSubscriptions = async (req, res) => {
@@ -27,5 +27,15 @@ export const getSubscription = async (req, res) => {
         }
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch subscription' });
+    }
+};
+
+// Get subscription stats (counts by status)
+export const getSubscriptionsStats = async (req, res) => {
+    try {
+        const stats = await getSubscriptionStats();
+        res.json({ stats });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch subscription stats' });
     }
 };

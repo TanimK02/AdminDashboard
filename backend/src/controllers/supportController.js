@@ -1,4 +1,4 @@
-import { getSupportTicketById, getSupportTickets, updateSupportTicket, bulkUpdateSupportTickets } from "../services/supportService.js";
+import { getSupportTicketById, getSupportTickets, updateSupportTicket, bulkUpdateSupportTickets, getTicketStats } from "../services/supportService.js";
 import { createActivityLog } from '../services/activityLogService.js';
 
 // Get all support tickets with optional filters and pagination
@@ -57,5 +57,15 @@ export const bulkUpdateSupportTicketsByIds = async (req, res) => {
         res.json({ updatedCount });
     } catch (error) {
         res.status(500).json({ error: 'Failed to bulk update support tickets' });
+    }
+};
+
+// Get ticket stats (counts)
+export const getTicketsStats = async (req, res) => {
+    try {
+        const stats = await getTicketStats();
+        res.json({ stats });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch ticket stats' });
     }
 };

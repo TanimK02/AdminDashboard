@@ -12,12 +12,25 @@ interface User {
   createdAt: string
 }
 
+interface UserStats {
+  active: number
+  suspended: number
+  admins: number
+  users: number
+}
+
 interface Ticket {
   id: string
   title: string
   status: string
   priority: string
   createdAt: string
+}
+
+interface TicketStats {
+  open: number
+  resolved: number
+  urgent: number
 }
 
 interface Subscription {
@@ -28,6 +41,12 @@ interface Subscription {
   createdAt: string
 }
 
+interface SubscriptionStats {
+  active: number
+  canceled: number
+  failed: number
+}
+
 interface ActivityLog {
   id: string
   action: string
@@ -36,10 +55,19 @@ interface ActivityLog {
   createdAt: string
 }
 
+interface ActivityStats {
+  last24h: number
+}
+
 export function DashboardPage() {
   const { data: usersData } = useQuery({
     queryKey: ['users', 'dashboard'],
     queryFn: () => api.get<{ users: User[] }>('/users?limit=5'),
+  })
+
+  const { data: userStatsData } = useQuery({
+    queryKey: ['users', 'stats'],
+    queryFn: () => api.get<{ stats: UserStats }>('/users/stats'),
   })
 
   const { data: ticketsData } = useQuery({
@@ -47,9 +75,19 @@ export function DashboardPage() {
     queryFn: () => api.get<{ tickets: Ticket[] }>('/tickets?limit=5'),
   })
 
+  const { data: ticketStatsData } = useQuery({
+    queryKey: ['tickets', 'stats'],
+    queryFn: () => api.get<{ stats: TicketStats }>('/tickets/stats'),
+  })
+
   const { data: subscriptionsData } = useQuery({
     queryKey: ['subscriptions', 'dashboard'],
     queryFn: () => api.get<{ subscriptions: Subscription[] }>('/subscriptions?limit=5'),
+  })
+
+  const { data: subscriptionStatsData } = useQuery({
+    queryKey: ['subscriptions', 'stats'],
+    queryFn: () => api.get<{ stats: SubscriptionStats }>('/subscriptions/stats'),
   })
 
   const { data: activityData } = useQuery({
@@ -57,30 +95,37 @@ export function DashboardPage() {
     queryFn: () => api.get<{ logs: ActivityLog[] }>('/activity?limit=5'),
   })
 
+  const { data: activityStatsData } = useQuery({
+    queryKey: ['activity', 'stats'],
+    queryFn: () => api.get<{ stats: ActivityStats }>('/activity/stats'),
+  })
+
   const stats = [
     {
       title: 'Total Users',
-      value: usersData?.users.length || 0,
+      value:
+        (userStatsData?.stats.active ?? 0) +
+        (userStatsData?.stats.suspended ?? 0),
       icon: Users,
-      description: 'Recent users',
+      description: `${userStatsData?.stats.active ?? 0} active`,
     },
     {
       title: 'Open Tickets',
-      value: ticketsData?.tickets.filter((t) => t.status === 'OPEN').length || 0,
+      value: ticketStatsData?.stats.open || 0,
       icon: Ticket,
-      description: 'Active support tickets',
+      description: 'Open support tickets',
     },
     {
       title: 'Active Subscriptions',
-      value: subscriptionsData?.subscriptions.filter((s) => s.status === 'ACTIVE').length || 0,
+      value: subscriptionStatsData?.stats.active || 0,
       icon: CreditCard,
       description: 'Active subscriptions',
     },
     {
       title: 'Recent Activity',
-      value: activityData?.logs.length || 0,
+      value: activityStatsData?.stats.last24h || 0,
       icon: Activity,
-      description: 'Latest activity logs',
+      description: 'in last 24h',
     },
   ]
 

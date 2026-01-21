@@ -53,7 +53,18 @@ const bulkUpdateUserStatus = async (userIds, status) => {
     return result.count; // number of records updated
 };
 
-export { getUsers, getUserById, updateUserStatus, bulkUpdateUserStatus };
+const getUserStats = async () => {
+    const [active, suspended, admins, regularUsers] = await Promise.all([
+        prisma.user.count({ where: { status: 'ACTIVE' } }),
+        prisma.user.count({ where: { status: 'SUSPENDED' } }),
+        prisma.user.count({ where: { role: 'ADMIN' } }),
+        prisma.user.count({ where: { role: 'USER' } }),
+    ]);
+
+    return { active, suspended, admins, users: regularUsers };
+};
+
+export { getUsers, getUserById, updateUserStatus, bulkUpdateUserStatus, getUserStats };
 
 
 

@@ -173,3 +173,13 @@ export async function bulkUpdateSupportTickets(ids, updates) {
     });
     return tickets;
 }
+
+export async function getTicketStats() {
+    const [open, resolved, urgent] = await Promise.all([
+        prisma.supportTicket.count({ where: { status: 'OPEN' } }),
+        prisma.supportTicket.count({ where: { status: 'RESOLVED' } }),
+        prisma.supportTicket.count({ where: { priority: 'URGENT' } }),
+    ]);
+
+    return { open, resolved, urgent };
+}

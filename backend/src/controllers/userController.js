@@ -1,4 +1,4 @@
-import { getUsers, getUserById, updateUserStatus, bulkUpdateUserStatus } from '../services/userService.js';
+import { getUsers, getUserById, updateUserStatus, bulkUpdateUserStatus, getUserStats } from '../services/userService.js';
 import { createActivityLog } from '../services/activityLogService.js';
 
 // Get all users
@@ -51,5 +51,15 @@ export const bulkUpdateUsers = async (req, res) => {
         res.json({ updatedCount });
     } catch (error) {
         res.status(500).json({ error: 'Failed to bulk update user statuses' });
+    }
+};
+
+// Get user stats (counts)
+export const getUsersStats = async (req, res) => {
+    try {
+        const stats = await getUserStats();
+        res.json({ stats });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch user stats' });
     }
 };

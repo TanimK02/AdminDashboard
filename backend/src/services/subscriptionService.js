@@ -148,3 +148,13 @@ export async function getSubscriptionById(subscriptionId) {
     });
     return subscription;
 }
+
+export async function getSubscriptionStats() {
+    const [active, canceled, failed] = await Promise.all([
+        prisma.subscription.count({ where: { status: 'ACTIVE' } }),
+        prisma.subscription.count({ where: { status: 'CANCELED' } }),
+        prisma.subscription.count({ where: { status: 'FAILED' } }),
+    ]);
+
+    return { active, canceled, failed };
+}
