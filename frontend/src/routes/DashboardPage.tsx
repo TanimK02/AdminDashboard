@@ -33,26 +33,10 @@ interface TicketStats {
   urgent: number
 }
 
-interface Subscription {
-  id: string
-  plan: string
-  status: string
-  price: number
-  createdAt: string
-}
-
 interface SubscriptionStats {
   active: number
   canceled: number
   failed: number
-}
-
-interface ActivityLog {
-  id: string
-  action: string
-  actorType: string
-  entityType: string
-  createdAt: string
 }
 
 interface ActivityStats {
@@ -80,19 +64,9 @@ export function DashboardPage() {
     queryFn: () => api.get<{ stats: TicketStats }>('/tickets/stats'),
   })
 
-  const { data: subscriptionsData } = useQuery({
-    queryKey: ['subscriptions', 'dashboard'],
-    queryFn: () => api.get<{ subscriptions: Subscription[] }>('/subscriptions?limit=5'),
-  })
-
   const { data: subscriptionStatsData } = useQuery({
     queryKey: ['subscriptions', 'stats'],
     queryFn: () => api.get<{ stats: SubscriptionStats }>('/subscriptions/stats'),
-  })
-
-  const { data: activityData } = useQuery({
-    queryKey: ['activity', 'dashboard'],
-    queryFn: () => api.get<{ logs: ActivityLog[] }>('/activity?limit=5'),
   })
 
   const { data: activityStatsData } = useQuery({
