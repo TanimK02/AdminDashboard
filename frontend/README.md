@@ -2,6 +2,8 @@
 
 A modern admin dashboard built with Vite, React, TypeScript, and Tailwind CSS.
 
+Repo-wide setup, security notes, and backend instructions: [README.md](../README.md). HTTP routes, query parameters, and payloads: [docs/API.md](../docs/API.md).
+
 ## Features
 
 - **Authentication**: Password-based admin login with JWT token management
@@ -30,7 +32,7 @@ A modern admin dashboard built with Vite, React, TypeScript, and Tailwind CSS.
 npm install
 ```
 
-2. Create a `.env` file in the frontend directory:
+2. Create a `.env` file (you can copy `.env.example`):
 ```
 VITE_API_BASE_URL=http://localhost:5000
 ```
@@ -76,21 +78,9 @@ frontend/
 │   └── main.tsx        # Entry point
 ```
 
-## API Integration
+## API integration
 
-The frontend communicates with the backend API at the URL specified in `VITE_API_BASE_URL`. All API requests automatically include the JWT token from localStorage in the Authorization header.
-
-### Endpoints Used
-
-- `POST /api/auth/login` - Admin login
-- `GET /users` - Get users (with filters and pagination)
-- `PATCH /users/:id` - Update user status
-- `PATCH /users/bulk` - Bulk update user statuses
-- `GET /tickets` - Get support tickets (with filters and pagination)
-- `PATCH /tickets/:id` - Update ticket
-- `PATCH /tickets/bulk` - Bulk update tickets
-- `GET /subscriptions` - Get subscriptions (with filters and pagination)
-- `GET /activity` - Get activity logs (with filters and pagination)
+The UI reads `VITE_API_BASE_URL` and sends `Authorization: Bearer <token>` from `localStorage` (`admin_token`) on each request via [src/lib/api.ts](src/lib/api.ts). For a full endpoint list and pagination rules, see [docs/API.md](../docs/API.md).
 
 ## Authentication
 

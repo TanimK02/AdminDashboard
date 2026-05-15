@@ -1,83 +1,97 @@
-# AdminDashboard
+# Admin Dashboard
 
-Full-stack **Admin Dashboard** with an Express + Prisma (Postgres) backend and a Vite + React + TypeScript frontend.
+Full-stack admin console: **Express + Prisma (PostgreSQL)** API and a **Vite + React + TypeScript** web UI (Tailwind, TanStack Query).
 
-## Repo structure
-
-- `backend/`: Express API + Prisma (Postgres)
-- `frontend/`: Admin UI (Vite + React + TS + Tailwind)
+Use this repo as the single entry point. Backend-specific steps live in [backend/README.md](backend/README.md). Full HTTP details are in [docs/API.md](docs/API.md). High-level system layout is in [docs/architecture.md](docs/architecture.md).
 
 ## Features
 
-- **Admin auth**: password login -> JWT (Bearer token)
-- **Users**: list, filter, update status, bulk update
-- **Support tickets**: list, filter, edit, bulk update, cursor pagination
-- **Subscriptions**: list, filter, pagination, detail view
-- **Activity logs**: list, filter, pagination, detail view
+- **Authentication**: shared admin password → JWT (`Bearer` token)
+- **Users**: list, filters, cursor pagination, single user, status update, bulk status update, aggregate stats
+- **Support tickets**: list, filters, cursor pagination with `nextCursor`, edit, bulk status update, stats
+- **Subscriptions**: list, filter, cursor-style pagination (by subscription id), detail, stats
+- **Activity logs**: list, filters, cursor pagination, detail, stats (last 24h count)
 
 ## Requirements
 
-- Node.js (recommended: **18+**)
-- Postgres database (for Prisma)
+- **Node.js** 18+
+- **PostgreSQL** (Prisma datasource is PostgreSQL)
 
-## Backend setup
+## Quick start
+
+### 1. Database and backend
 
 ```bash
 cd backend
 npm install
+npx prisma generate
+cp .env.example .env   # then edit .env with your real DATABASE_URL and secrets
+npx prisma migrate deploy   # or: npx prisma migrate dev  (local development)
+npm run seed                # optional: sample data
+npm run start               # API on http://localhost:5000 by default
 ```
 
-Create a `backend/.env` file:
+Prisma generates the client into `backend/generated/prisma` (see [backend/prisma/schema.prisma](backend/prisma/schema.prisma)). Run `npx prisma generate` after install or whenever the schema changes.
 
-```env
-DATABASE_URL=postgresql://USER:PASSWORD@HOST:PORT/DB_NAME
-JWT_SECRET=your_secret_here
-ADMIN_PASSWORD=your_admin_password_here
-PORT=5000
-```
-
-Run migrations (if needed) and start the server:
-
-```bash
-cd backend
-npx prisma migrate deploy
-npm run start
-```
-
-The API will run on `http://localhost:5000` by default.
-
-### API routes (high level)
-
-- `POST /api/auth/login`
-- `GET /users`, `PATCH /users/:id`, `PATCH /users/bulk`
-- `GET /tickets`, `PATCH /tickets/:id`, `PATCH /tickets/bulk`
-- `GET /subscriptions`, `GET /subscriptions/:id`
-- `GET /activity`, `GET /activity/:id`
-
-## Frontend setup
+### 2. Frontend
 
 ```bash
 cd frontend
 npm install
+cp .env.example .env        # set VITE_API_BASE_URL to your API origin
+npm run dev                 # UI on http://localhost:5173
 ```
 
-Create `frontend/.env`:
+Set `VITE_API_BASE_URL` to the backend origin (no trailing slash required for how the client builds URLs). Example: `http://localhost:5000`.
 
-```env
-VITE_API_BASE_URL=http://localhost:5000
-```
+## Environment variables
 
-Start the dev server:
+| Location | Variable | Purpose |
+|----------|----------|---------|
+| Backend | `DATABASE_URL` | PostgreSQL connection string for Prisma |
+| Backend | `JWT_SECRET` | Secret used to sign and verify admin JWTs |
+| Backend | `ADMIN_PASSWORD` | Plain-text password checked on `POST /api/auth/login` |
+| Backend | `PORT` | API port (default `5000`) |
+| Frontend | `VITE_API_BASE_URL` | Base URL for API requests |
 
-```bash
-cd frontend
-npm run dev
-```
+Templates: [backend/.env.example](backend/.env.example), [frontend/.env.example](frontend/.env.example).
 
-Open the app at `http://localhost:5173`.
+## API overview
 
-## Notes
+- **Auth (no JWT):** `POST /api/auth/login` — body `{ "password": "..." }` → `{ "token": "..." }`.
+- **All other routes** require header `Authorization: Bearer <token>`.
 
-- The frontend stores the admin JWT in `localStorage` and sends it as `Authorization: Bearer <token>` on every request.
-- If a request returns `401`, the frontend automatically logs out and redirects to `/login`.
+Path prefix: everything except login is mounted at the paths below (not under `/api`).
 
+| Area | Base path | Notes |
+|------|-----------|--------|
+| Users | `/users` | Includes `GET /users/stats` |
+| Tickets | `/tickets` | List returns `nextCursor` when more pages exist |
+| Subscriptions | `/subscriptions` | Cursor is “last seen id” (`id` greater than cursor) |
+| Activity | `/activity` | |
+
+Full route list, query parameters, and response shapes: **[docs/API.md](docs/API.md)**.
+
+## Frontend behavior
+
+- JWT is stored in `localStorage` as `admin_token` and sent as `Authorization: Bearer <token>`.
+- Responses with **401** clear the token and redirect to `/login`.
+
+## Security notes
+
+- A single shared `ADMIN_PASSWORD` is suitable for demos only; production systems should use proper identity providers and user accounts.
+- JWT in `localStorage` is convenient for a dashboard but is vulnerable to XSS; keep dependencies patched and avoid injecting untrusted HTML.
+
+## Troubleshooting
+
+- **Prisma errors after clone:** run `cd backend && npx prisma generate` and ensure `DATABASE_URL` points at a reachable PostgreSQL instance.
+- **401 on every request:** wrong or missing `JWT_SECRET` between login and verify, expired token (default expiry 1 day), or missing `Bearer` prefix.
+- **CORS:** backend uses `cors()` with default settings; for production, restrict origins to your UI host.
+
+## Repository layout
+
+| Path | Role |
+|------|------|
+| [backend/](backend/) | Express API, Prisma, Jest tests, seed script |
+| [frontend/](frontend/) | Vite + React admin UI |
+| [docs/](docs/) | API reference and architecture notes |
